@@ -1,0 +1,28 @@
+/* TEAM */
+Title: Founder & CEO
+Name: Baobab Team
+Site: https://baobab.ng
+Email: hello@baobab.ng
+
+Title: Contributors
+Name: AI-Assisted Development Team
+GitHub: https://github.com/baobab-ng
+
+/* SITE */
+Last Updated: 2026-07-09
+Language: English
+Charset: UTF-8
+Standards: HTML5, CSS3, JavaScript
+Components: Next.js 16, TypeScript, Tailwind CSS, Prisma
+Database: SQLite (Dev), PostgreSQL (Production)
+CMS: Prisma Studio
+
+/* THANKS */
+Built with love for Nigeria
+Inspired by trusted information accessibility
+Built to serve Nigerians accomplishing real tasks
+
+/* CONTACT */
+Twitter: @baobab_ng
+Email: hello@baobab.ng
+Website: https://baobab.ng

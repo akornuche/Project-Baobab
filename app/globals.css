@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #161616;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Table of contents styles */
+.table-of-contents {
+  counter-reset: section;
+}
+
+.table-of-contents li {
+  list-style: none;
+  margin-bottom: 0.5rem;
+}
+
+.table-of-contents a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.table-of-contents a:hover {
+  text-decoration: underline;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

@@ -39,3 +39,25 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local binaries and backups (too large / not source)
+node_modules_backup/
+meilisearch.exe
+*.exe
+*.msi
+*.dmg
+
+# local databases and search indexes
+data.ms/
+meili_data/
+*.sqlite
+*.db
+
+# OS / editor
+Thumbs.db
+.vscode/
+.idea/
+
+# ad-hoc local test scripts
+test-calculators.js
+
