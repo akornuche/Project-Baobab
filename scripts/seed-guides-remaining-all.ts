@@ -99,8 +99,8 @@ async function upsertSubdomains() {
     }
     await prisma.subdomain.upsert({
       where: { slug: sub.slug },
-      update: { name: sub.name, description: sub.description, order: sub.order },
-      create: { ...sub, domainId },
+      update: { name: sub.name, description: sub.description, order: sub.order, domainId },
+      create: { slug: sub.slug, name: sub.name, description: sub.description, domainId, order: sub.order },
     });
     console.log(`✅ Upserted subdomain: ${sub.name}`);
   }
