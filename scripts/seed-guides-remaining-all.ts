@@ -85,6 +85,27 @@ const SUBDOMAINS: { slug: string; name: string; description: string; domainSlug:
   { slug: 'education-hub',         name: 'Education Hub Pages',         description: 'Overview and planning guides',         domainSlug: 'education',  order: 8 },
 ];
 
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+
+async function upsertSubdomains() {
+  const domains = await prisma.domain.findMany();
+  const domainMap = Object.fromEntries(domains.map(d => [d.slug, d.id]));
+
+  for (const sub of SUBDOMAINS) {
+    const domainId = domainMap[sub.domainSlug];
+    if (!domainId) {
+      console.warn(`⚠️ Domain "${sub.domainSlug}" not found for subdomain "${sub.slug}"`);
+      continue;
+    }
+    await prisma.subdomain.upsert({
+      where: { slug: sub.slug },
+      update: { name: sub.name, description: sub.description, order: sub.order },
+      create: { ...sub, domainId },
+    });
+    console.log(`✅ Upserted subdomain: ${sub.name}`);
+  }
+}
+
 // ─── GUIDE DATA ───────────────────────────────────────────────────────────────
 // Each entry = one guide page. Slugs already in DB will be skipped.
 
@@ -1409,7 +1430,7 @@ const GUIDES: GuideRow[] = [
       overview: 'Property tax in Nigeria is primarily administered by state governments. Lagos State\'s Land Use Charge is the most developed system — other states have varying arrangements.',
       definitions: [
         { term: 'Land Use Charge (LUC)', definition: 'Lagos State\'s annual property tax — combines ground rent, tenement rate, and neighbourhood improvement levy.' },
-        { term: 'Property Value Assessment', description: 'The estimated market value of your property used to calculate LUC.', isMandatory: false },
+        { term: 'Property Value Assessment', definition: 'The estimated market value of your property used to calculate LUC.' },
       ],
       requirements: [
         { title: 'Property title document', description: 'C of O, deed of assignment, or tenancy agreement.', isMandatory: true },
@@ -2714,3 +2735,116 @@ const GUIDES: GuideRow[] = [
     sources: [{ title: 'CBN Trade Finance Guidelines', url: 'https://cbn.gov.ng', verified: true }],
     reviewerName: 'Tunde Adeyemi, Import/Export Specialist',
   },
+
+  // ── END OF GUIDE DATA ───────────────────────────────────────────────────────
+
+];
+
+// ─── MAIN FUNCTION ────────────────────────────────────────────────────────────
+
+async function seedAllGuides() {
+  console.log('🌱 Seeding all 300 guides from baobab-04 roadmap...');
+  console.log(`📋 ${SUBDOMAINS.length} subdomains to upsert`);
+  console.log(`📚 ${GUIDES.length} guides to process`);
+
+  try {
+    // Upsert subdomains first
+    console.log('\n📦 Upserting subdomains...');
+    await upsertSubdomains();
+
+    // Process each guide
+    let created = 0, skipped = 0, errors = 0;
+
+    for (const guideData of GUIDES) {
+      console.log(`📝 Processing: ${guideData.title}`);
+
+      try {
+        // Find domain and subdomain
+        const domain = await prisma.domain.findUnique({
+          where: { slug: guideData.domainSlug },
+        });
+        const subdomain = await prisma.subdomain.findUnique({
+          where: { slug: guideData.subdomainSlug },
+        });
+
+        if (!domain || !subdomain) {
+          console.warn(`   ⚠️  Domain/subdomain not found, skipping...`);
+          skipped++;
+          continue;
+        }
+
+        // Check if guide already exists
+        const existing = await prisma.guide.findUnique({
+          where: { slug: guideData.slug },
+        });
+
+        if (existing) {
+          console.log(`   ⏭️  Already exists`);
+          skipped++;
+          continue;
+        }
+
+        // Get or create reviewer
+        let reviewer = await prisma.user.findFirst({
+          where: { name: guideData.reviewerName },
+        });
+
+        if (!reviewer) {
+          reviewer = await prisma.user.create({
+            data: {
+              name: guideData.reviewerName,
+              email: `${guideData.reviewerName.toLowerCase().replace(/\s+/g, '.')}@baobab.ng`,
+              role: 'reviewer',
+            },
+          });
+        }
+
+        // Create guide
+        const guide = await prisma.guide.create({
+          data: {
+            title: guideData.title,
+            slug: guideData.slug,
+            subtitle: guideData.subtitle,
+            description: guideData.description,
+            content: JSON.stringify(guideData.content),
+            domainId: domain.id,
+            subdomainId: subdomain.id,
+            reviewerId: reviewer.id,
+            published: true,
+            publishedAt: new Date(),
+            lastVerified: new Date(),
+          },
+        });
+
+        // Create sources
+        for (const source of guideData.sources) {
+          await prisma.guideSource.create({
+            data: {
+              title: source.title,
+              url: source.url,
+              verified: source.verified,
+              guideId: guide.id,
+            },
+          });
+        }
+
+        created++;
+        console.log(`   ✅ Created`);
+      } catch (error) {
+        console.error(`   ❌ Error: ${(error as Error).message}`);
+        errors++;
+      }
+    }
+
+    console.log(`\n✨ Seeding complete!`);
+    console.log(`📊 Summary: ${created} created, ${skipped} skipped, ${errors} errors`);
+  } catch (error) {
+    console.error('❌ Fatal error:', error);
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+// Run seeding
+seedAllGuides();
