@@ -100,11 +100,74 @@ model DirectoryListing {
   guideId         String?
   verified        Boolean   @default(false)
   premium         Boolean   @default(false)
+  
+  // Premium tier details
+  premiumTier     String?   @default("free")  // free, basic, premium, enterprise
+  premiumStartDate DateTime?
+  premiumEndDate  DateTime?
+  premiumAutoRenew Boolean  @default(true)
+  
+  // Rating and reviews
+  rating          Float     @default(0.0)  // 0-5 stars
+  reviewCount     Int       @default(0)
+  
+  // Listing metadata
+  impressions     Int       @default(0)
+  clicks          Int       @default(0)
+  
+  // Status
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   isDeleted       Boolean   @default(false)
   
+  // Relations
   guide           Guide?    @relation(fields: [guideId], references: [id])
+  subscriptions   DirectorySubscription[]
+  reviews         DirectoryReview[]
+}
+
+model DirectorySubscription {
+  id              String    @id @default(cuid())
+  listingId       String
+  listing         DirectoryListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  tier            String    @default("free")  // free, basic, premium, enterprise
+  startDate       DateTime
+  endDate         DateTime
+  autoRenew       Boolean   @default(true)
+  
+  // Payment tracking
+  amountPaid      Float?    // Amount paid in NGN
+  paymentStatus   String    @default("PENDING")  // PENDING, COMPLETED, FAILED, REFUNDED
+  transactionId   String?   // Payment provider transaction ID
+  invoiceUrl      String?   // Link to invoice
+  
+  // Cancellation
+  cancelledAt     DateTime?
+  cancellationReason String?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model DirectoryReview {
+  id              String    @id @default(cuid())
+  listingId       String
+  listing         DirectoryListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  
+  rating          Int       @default(5)  // 1-5 stars
+  title           String?
+  comment         String?
+  reviewer        String?   // Optional reviewer name
+  email           String?   // Optional reviewer email for notification
+  
+  verified        Boolean   @default(false)  // Verified purchaser
+  helpful         Int       @default(0)  // Count of helpful votes
+  
+  status          String    @default("PENDING")  // PENDING, APPROVED, REJECTED
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }
 
 model GuideSource {
