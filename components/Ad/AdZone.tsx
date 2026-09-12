@@ -7,99 +7,62 @@ interface AdZoneProps {
   zone: 'header' | 'sidebar' | 'content' | 'footer' | 'infeed';
   size?: 'leaderboard' | 'medium_rectangle' | 'skyscraper' | 'square' | 'half_page';
   className?: string;
+  limit?: number;
 }
 
-// Placeholder ads data for demo
-const mockAds: Record<string, any[]> = {
-  header: [
-    {
-      id: 'header-ad-1',
-      zone: 'header',
-      size: 'leaderboard',
-      imageUrl: 'https://placehold.co/728x90/e2e8f0/475569?text=Header+Ad',
-      alt: 'Header Advertisement',
-      link: 'https://example.com/ad1',
-      startTime: new Date('2026-01-01'),
-      endTime: new Date('2027-01-01'),
-      impressionCount: 0,
-      clickCount: 0,
-    },
-  ],
-  sidebar: [
-    {
-      id: 'sidebar-ad-1',
-      zone: 'sidebar',
-      size: 'skyscraper',
-      imageUrl: 'https://placehold.co/300x600/e2e8f0/475569?text=Sidebar+Ad',
-      alt: 'Sidebar Advertisement',
-      link: 'https://example.com/ad2',
-      startTime: new Date('2026-01-01'),
-      endTime: new Date('2027-01-01'),
-      impressionCount: 0,
-      clickCount: 0,
-    },
-  ],
-  content: [
-    {
-      id: 'content-ad-1',
-      zone: 'content',
-      size: 'medium_rectangle',
-      imageUrl: 'https://placehold.co/300x250/e2e8f0/475569?text=Content+Ad',
-      alt: 'Content Advertisement',
-      link: 'https://example.com/ad3',
-      startTime: new Date('2026-01-01'),
-      endTime: new Date('2027-01-01'),
-      impressionCount: 0,
-      clickCount: 0,
-    },
-  ],
-  footer: [
-    {
-      id: 'footer-ad-1',
-      zone: 'footer',
-      size: 'leaderboard',
-      imageUrl: 'https://placehold.co/728x90/e2e8f0/475569?text=Footer+Ad',
-      alt: 'Footer Advertisement',
-      link: 'https://example.com/ad4',
-      startTime: new Date('2026-01-01'),
-      endTime: new Date('2027-01-01'),
-      impressionCount: 0,
-      clickCount: 0,
-    },
-  ],
-  infeed: [
-    {
-      id: 'infeed-ad-1',
-      zone: 'infeed',
-      size: 'medium_rectangle',
-      imageUrl: 'https://placehold.co/300x250/e2e8f0/475569?text=In+Feed+Ad',
-      alt: 'In-Feed Advertisement',
-      link: 'https://example.com/ad5',
-      startTime: new Date('2026-01-01'),
-      endTime: new Date('2027-01-01'),
-      impressionCount: 0,
-      clickCount: 0,
-    },
-  ],
-};
-
-export function AdZone({ zone, size = 'medium_rectangle', className = '' }: AdZoneProps) {
+export function AdZone({ zone, size = 'medium_rectangle', className = '', limit = 3 }: AdZoneProps) {
   const [ads, setAds] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // In production, this would fetch ads from the API
-    // fetch(`/api/ads?zone=${zone}&size=${size}`)
-    const zoneAds = mockAds[zone] || [];
-    
-    // Filter by size if specified
-    const filteredAds = size ? zoneAds.filter(ad => ad.size === size) : zoneAds;
-    setAds(filteredAds);
-  }, [zone, size]);
+    const fetchAds = async () => {
+      try {
+        setLoading(true);
+        const params = new URLSearchParams({
+          zone,
+          size,
+          limit: limit.toString(),
+        });
+
+        const response = await fetch(`/api/ads?${params.toString()}`);
+        if (!response.ok) throw new Error('Failed to fetch ads');
+
+        const data = await response.json();
+        setAds(data.ads || []);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching ads:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load ads');
+        setAds([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAds();
+  }, [zone, size, limit]);
+
+  if (loading) {
+    return (
+      <div className={`bg-gray-100 rounded-lg p-4 text-center ${className}`}>
+        <span className="text-sm text-gray-500">Loading ads...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={`bg-gray-100 rounded-lg p-4 text-center ${className}`}>
+        <span className="text-sm text-gray-500">Ad Zone: {zone}</span>
+      </div>
+    );
+  }
 
   if (ads.length === 0) {
     return (
       <div className={`bg-gray-100 rounded-lg p-4 text-center ${className}`}>
-        <span className="text-sm text-gray-500">Ad Zone: {zone}</span>
+        <span className="text-sm text-gray-500">No ads available</span>
       </div>
     );
   }

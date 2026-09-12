@@ -146,3 +146,85 @@ model EmailSubscriber {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
+
+model AdCampaign {
+  id              String     @id @default(cuid())
+  title           String
+  description     String?
+  advertiserName  String
+  advertiserEmail String?
+  advertiserPhone String?
+  advertiserUrl   String?
+  
+  // Campaign settings
+  startDate       DateTime
+  endDate         DateTime
+  budget          Float?                // Total budget in NGN
+  status          String     @default("DRAFT")  // DRAFT, ACTIVE, PAUSED, COMPLETED
+  
+  // Tracking
+  totalImpressions Int        @default(0)
+  totalClicks     Int        @default(0)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  isDeleted       Boolean    @default(false)
+  
+  // Relations
+  ads             Advertisement[]
+}
+
+model Advertisement {
+  id              String     @id @default(cuid())
+  campaignId      String
+  campaign        AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  
+  // Ad content
+  title           String
+  imageUrl        String?
+  linkUrl         String?
+  altText         String?
+  
+  // Ad placement
+  zone            String     @default("content")  // header, sidebar, content, footer, infeed
+  size            String     @default("medium_rectangle")  // leaderboard, medium_rectangle, skyscraper, square, half_page
+  priority        Int        @default(0)  // Higher priority ads shown first
+  
+  // Performance tracking
+  impressions     Int        @default(0)
+  clicks          Int        @default(0)
+  ctr             Float      @default(0.0)  // Click-through rate, auto-calculated
+  
+  // Status
+  status          String     @default("ACTIVE")  // ACTIVE, PAUSED, COMPLETED
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  isDeleted       Boolean    @default(false)
+  
+  // Relations
+  impressionEvents AdImpression[]
+  clickEvents     AdClick[]
+}
+
+model AdImpression {
+  id              String     @id @default(cuid())
+  adId            String
+  ad              Advertisement @relation(fields: [adId], references: [id], onDelete: Cascade)
+  
+  // Tracking info
+  userAgent       String?
+  referrer        String?
+  ipHash          String?     // Hashed IP for privacy
+  createdAt       DateTime   @default(now())
+}
+
+model AdClick {
+  id              String     @id @default(cuid())
+  adId            String
+  ad              Advertisement @relation(fields: [adId], references: [id], onDelete: Cascade)
+  
+  // Tracking info
+  userAgent       String?
+  referrer        String?
+  ipHash          String?     // Hashed IP for privacy
+  createdAt       DateTime   @default(now())
+}
