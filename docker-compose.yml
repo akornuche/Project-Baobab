@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  meilisearch:
+    image: getmeili/meilisearch:v1.11.3
+    container_name: baobab-meilisearch
+    ports:
+      - "7700:7700"
+    environment:
+      # Default master key for development
+      MEILI_MASTER_KEY: "masterKey"
+      # Enable telemetry (set to false in production)
+      MEILI_TELEMETRY: "false"
+      # Log level
+      RUST_LOG: "info"
+    volumes:
+      - meilisearch_data:/meili_data
+    networks:
+      - baobab
+
+  # Optional: PostgreSQL for production
+  # postgres:
+  #   image: postgres:15
+  #   container_name: baobab-postgres
+  #   environment:
+  #     POSTGRES_USER: baobab_app
+  #     POSTGRES_PASSWORD: secure_password_here
+  #     POSTGRES_DB: baobab
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - baobab
+
+networks:
+  baobab:
+    driver: bridge
+
+volumes:
+  meilisearch_data:
+  # postgres_data:
