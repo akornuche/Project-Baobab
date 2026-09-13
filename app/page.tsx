@@ -23,6 +23,7 @@ async function getFeaturedGuides() {
             published: true,
             isDeleted: false,
           },
+          include: { subdomain: true },
           take: 2,
           orderBy: {
             publishedAt: 'desc',
@@ -204,7 +205,7 @@ export default async function Home() {
           <p className="text-purple-100 mb-8">
             Get the latest guides, tools, and resources delivered to your inbox.
           </p>
-          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
+          <form action="/api/subscribers" method="POST" className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
             <input
               type="email"
               placeholder="Enter your email address"

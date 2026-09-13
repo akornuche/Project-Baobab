@@ -8,6 +8,7 @@ const prisma = new PrismaClient();
 
 interface GuideData {
   id: string;
+  slug: string;
   title: string;
   subtitle?: string;
   description?: string;
@@ -38,16 +39,17 @@ async function getGuide(slug: string): Promise<GuideData | null> {
     const content = JSON.parse(guide.content || '{}');
     return {
       id: guide.id,
+      slug: guide.slug,
       title: guide.title,
-      subtitle: guide.subtitle,
-      description: guide.description,
+      subtitle: guide.subtitle ?? undefined,
+      description: guide.description ?? undefined,
       content,
       domain: { name: guide.domain.name, slug: guide.domain.slug },
       subdomain: { name: guide.subdomain.name, slug: guide.subdomain.slug },
-      tool: guide.tool ? { id: guide.tool.id, name: guide.tool.name, slug: guide.tool.slug } : undefined,
-      reviewer: guide.reviewer,
-      sources: guide.sources,
-      lastVerified: guide.lastVerified,
+      tool: guide.tool ? { id: guide.tool.id, name: guide.tool.name, slug: guide.tool.id } : undefined,
+      reviewer: guide.reviewer ? { name: guide.reviewer.name || '' } : undefined,
+      sources: guide.sources.map((s) => ({ url: s.url, verified: s.verified, title: s.title ?? undefined })),
+      lastVerified: guide.lastVerified ? guide.lastVerified.toISOString() : undefined,
     };
   } catch (error) {
     console.error('Error parsing guide content:', error);
@@ -58,9 +60,10 @@ async function getGuide(slug: string): Promise<GuideData | null> {
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const guide = await getGuide(params.slug);
+  const { slug } = await params;
+  const guide = await getGuide(slug);
 
   if (!guide) {
     return {
@@ -106,7 +109,7 @@ export async function generateMetadata({
       url,
       type: 'article',
       images: [{ url, width: 1200, height: 630, alt: guide.title }],
-      publishedTime: guide.lastVerified?.toISOString(),
+      publishedTime: guide.lastVerified,
       modifiedTime: new Date().toISOString(),
     },
     twitter: {
@@ -130,9 +133,10 @@ export async function generateStaticParams() {
 export default async function GuidePage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const guide = await getGuide(params.slug);
+  const { slug } = await params;
+  const guide = await getGuide(slug);
 
   if (!guide) {
     notFound();
@@ -145,7 +149,7 @@ export default async function GuidePage({
       {/* HowTo Schema */}
       <HowToSchema
         title={guide.title}
-        description={guide.description || guide.subtitle}
+        description={guide.description || guide.subtitle || ''}
         image={imageUrl}
         author={guide.reviewer?.name}
         datePublished={new Date().toISOString()}
@@ -161,7 +165,7 @@ export default async function GuidePage({
       {/* Article Schema */}
       <ArticleSchema
         headline={guide.title}
-        description={guide.description || guide.subtitle}
+        description={guide.description || guide.subtitle || ''}
         image={imageUrl}
         author={guide.reviewer?.name}
         datePublished={new Date().toISOString()}
@@ -177,7 +181,7 @@ export default async function GuidePage({
           subdomainName: guide.subdomain.name,
           imageUrl,
           reviewerName: guide.reviewer?.name,
-          lastVerified: guide.lastVerified?.toISOString(),
+          lastVerified: guide.lastVerified,
         }}
         content={guide.content}
       />

@@ -1,14 +1,14 @@
-import { MeiliSearch } from 'meilisearch';
+import { Meilisearch } from 'meilisearch';
 
 const MEILISEARCH_URL = process.env.MEILISEARCH_URL || 'http://localhost:7700';
 const MEILISEARCH_API_KEY = process.env.MEILISEARCH_API_KEY || '';
 
-let meiliClient: MeiliSearch | null = null;
+let meiliClient: Meilisearch | null = null;
 
 export function getMeiliClient() {
   if (!meiliClient && MEILISEARCH_URL) {
     try {
-      meiliClient = new MeiliSearch({
+      meiliClient = new Meilisearch({
         host: MEILISEARCH_URL,
         apiKey: MEILISEARCH_API_KEY,
       });

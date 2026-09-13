@@ -3,68 +3,46 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-/**
- * GET /api/directory/subscriptions/[id]
- * Get subscription details
- */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const subscription = await prisma.directorySubscription.findUnique({
       where: { id },
-      include: {
-        listing: true,
-      },
+      include: { listing: true },
     });
 
     if (!subscription) {
-      return NextResponse.json(
-        { error: 'Subscription not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Subscription not found' }, { status: 404 });
     }
 
     return NextResponse.json(subscription);
   } catch (error) {
     console.error('Error fetching subscription:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch subscription' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch subscription' }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
 }
 
-/**
- * PATCH /api/directory/subscriptions/[id]
- * Update subscription (mark as paid, etc.)
- */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { paymentStatus, transactionId, invoiceUrl, autoRenew } = body;
 
-    const subscription = await prisma.directorySubscription.findUnique({
-      where: { id },
-    });
+    const subscription = await prisma.directorySubscription.findUnique({ where: { id } });
 
     if (!subscription) {
-      return NextResponse.json(
-        { error: 'Subscription not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Subscription not found' }, { status: 404 });
     }
 
-    // Update subscription
     const updated = await prisma.directorySubscription.update({
       where: { id },
       data: {
@@ -75,7 +53,6 @@ export async function PATCH(
       },
     });
 
-    // If payment completed, update listing tier
     if (paymentStatus === 'COMPLETED') {
       await prisma.directoryListing.update({
         where: { id: subscription.listingId },
@@ -91,40 +68,27 @@ export async function PATCH(
     return NextResponse.json(updated);
   } catch (error) {
     console.error('Error updating subscription:', error);
-    return NextResponse.json(
-      { error: 'Failed to update subscription' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update subscription' }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
 }
 
-/**
- * DELETE /api/directory/subscriptions/[id]
- * Cancel subscription
- */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { reason } = body;
 
-    const subscription = await prisma.directorySubscription.findUnique({
-      where: { id },
-    });
+    const subscription = await prisma.directorySubscription.findUnique({ where: { id } });
 
     if (!subscription) {
-      return NextResponse.json(
-        { error: 'Subscription not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Subscription not found' }, { status: 404 });
     }
 
-    // Cancel subscription
     const cancelled = await prisma.directorySubscription.update({
       where: { id },
       data: {
@@ -134,7 +98,6 @@ export async function DELETE(
       },
     });
 
-    // If was the active subscription, revert listing to free tier
     const activeSub = await prisma.directorySubscription.findFirst({
       where: {
         listingId: subscription.listingId,
@@ -158,10 +121,7 @@ export async function DELETE(
     return NextResponse.json({ message: 'Subscription cancelled', cancelled });
   } catch (error) {
     console.error('Error cancelling subscription:', error);
-    return NextResponse.json(
-      { error: 'Failed to cancel subscription' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to cancel subscription' }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }

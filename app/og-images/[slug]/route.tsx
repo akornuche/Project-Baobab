@@ -8,7 +8,7 @@ import { ImageResponse } from 'next/og';
 export const runtime = 'nodejs';
 
 interface ImageParams {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 /**
@@ -119,7 +119,7 @@ export async function GET(
   _request: Request,
   { params }: ImageParams
 ) {
-  const { slug } = params;
+  const { slug } = await params;
   const template = getTemplate(slug);
   const { title, subtitle, icon, colors } = template;
 

@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         adId,
         userAgent,
         referrer,
-        ipHash: hashIP(ip),
+        ipHash: hashIP(ip ?? null),
       },
     });
 

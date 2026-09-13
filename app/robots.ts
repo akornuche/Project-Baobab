@@ -30,6 +30,5 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: 'https://baobab.ng/sitemap.xml',
-    crawlDelay: 1,
   };
 }

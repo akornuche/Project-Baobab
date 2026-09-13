@@ -52,7 +52,7 @@ export default function AdminGuidesPage() {
           published: g.published,
           publishedAt: g.publishedAt?.toISOString() || g.createdAt.toISOString(),
           createdAt: g.createdAt.toISOString(),
-          reviewer: g.reviewer,
+          reviewer: g.reviewer ? { name: g.reviewer.name || '' } : undefined,
         }))
       );
     } catch (error) {

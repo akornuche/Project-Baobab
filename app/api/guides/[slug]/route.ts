@@ -5,10 +5,10 @@ const prisma = new PrismaClient();
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     const guide = await prisma.guide.findUnique({
       where: { slug, isDeleted: false },
@@ -16,13 +16,7 @@ export async function GET(
         domain: true,
         subdomain: true,
         sources: true,
-        reviewer: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
+        reviewer: { select: { id: true, name: true, email: true } },
         tool: true,
       },
     });
@@ -40,10 +34,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
     const data = await request.json();
 
     const guide = await prisma.guide.update({
@@ -60,15 +54,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
-    await prisma.guide.update({
-      where: { slug },
-      data: { isDeleted: true },
-    });
+    await prisma.guide.update({ where: { slug }, data: { isDeleted: true } });
 
     return NextResponse.json({ message: 'Guide deleted successfully' });
   } catch (error) {

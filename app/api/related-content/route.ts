@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     } else if (currentType === 'calculator') {
       // Find related calculators and guides
       const calculators = await prisma.tool.findMany({
-        where: { isDeleted: false },
+        where: {},
         take: limit - 1,
       });
 
@@ -70,8 +70,8 @@ export async function POST(request: NextRequest) {
       relatedContent = [
         ...calculators.map((tool) => ({
           title: tool.name,
-          url: `/calculators/${tool.slug}`,
-          description: tool.description?.slice(0, 100),
+          url: `/calculators/${tool.id}`,
+          description: undefined,
           type: 'calculator',
         })),
         ...relevantGuides.map((guide) => ({
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       });
 
       relatedContent = listings.map((listing) => ({
-        title: listing.businessName,
+        title: listing.name,
         url: `/directory/${listing.id}`,
         description: listing.description?.slice(0, 100),
         type: 'directory',
