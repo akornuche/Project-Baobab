@@ -3,6 +3,11 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Skip prerendering for all pages during build - use dynamic rendering on first request
+  experimental: {
+    // Disable static generation entirely to allow Vercel builds without DATABASE_URL
+    allowDynamicPageRendering: true,
+  },
   reactStrictMode: true,
   // Image optimization
   images: {
