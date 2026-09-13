@@ -5,6 +5,7 @@ import { GuidePageTemplate } from '@/components/Guide/GuidePageTemplate';
 import { HowToSchema, ArticleSchema } from '@/components/SEO/StructuredData';
 
 export const dynamic = 'force-dynamic';
+export const dynamicParams = false;
 
 const prisma = new PrismaClient();
 
