@@ -1,6 +1,6 @@
 'use client';
 
-export const revalidate = 0; // Disable caching for admin pages
+export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react';
 import { PrismaClient } from '@prisma/client';
