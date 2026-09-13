@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import Link from 'next/link';
 import { EmailSignup } from '@/components/Email/EmailSignup';
 import { SearchAutocomplete } from '@/components/Search/Autocomplete';

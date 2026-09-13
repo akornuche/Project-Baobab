@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { Calculator } from '@/components/Calculator/Calculator';
 import { CalculatorResult } from '@/lib/types';
 
