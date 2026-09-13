@@ -4,6 +4,8 @@ import type { Metadata } from 'next';
 import { GuidePageTemplate } from '@/components/Guide/GuidePageTemplate';
 import { HowToSchema, ArticleSchema } from '@/components/SEO/StructuredData';
 
+export const dynamic = 'force-dynamic';
+
 const prisma = new PrismaClient();
 
 interface GuideData {
