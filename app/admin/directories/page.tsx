@@ -1,5 +1,7 @@
 'use client';
 
+export const revalidate = 0; // Disable caching for admin pages
+
 import { useState, useEffect } from 'react';
 import { PrismaClient } from '@prisma/client';
 import Link from 'next/link';
