@@ -1,6 +1,3 @@
 {
-  "buildCommand": "npm run build -- --no-lint",
-  "env": {
-    "SKIP_BUILD_TYPESCRIPT": "1"
-  }
+  "buildCommand": "npm run build"
 }
