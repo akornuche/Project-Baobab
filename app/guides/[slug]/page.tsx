@@ -123,11 +123,18 @@ export async function generateMetadata({
 }
 
 export async function generateStaticParams() {
-  const guides = await prisma.guide.findMany({
-    where: { isDeleted: false },
-    select: { slug: true },
-  });
-  return guides.map((guide) => ({ slug: guide.slug }));
+  try {
+    const guides = await prisma.guide.findMany({
+      where: { isDeleted: false },
+      select: { slug: true },
+    });
+    return guides.map((guide) => ({ slug: guide.slug }));
+  } catch (error) {
+    // During build on Vercel, database may not be available
+    // Return empty array to skip pre-generation, use on-demand ISR instead
+    console.warn('generateStaticParams: Database unavailable, using on-demand ISR');
+    return [];
+  }
 }
 
 export default async function GuidePage({
