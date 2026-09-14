@@ -14,7 +14,7 @@
 
 **Connection String:**
 ```
-postgresql://neondb_owner:npg_vpLmiX2tBN8r@ep-green-recipe-a5anf90w.us-east-2.aws.neon.tech/neondb?sslmode=require
+postgresql://neondb_owner:REDACTED@ep-green-recipe-a5anf90w.us-east-2.aws.neon.tech/neondb?sslmode=require
 ```
 
 **Connection Verified:** ✅ Successfully connected via Prisma
@@ -60,7 +60,7 @@ Go to: https://vercel.com/codez-mania-team/project-baobab
 
 ```
 Key:    DATABASE_URL
-Value:  postgresql://neondb_owner:npg_vpLmiX2tBN8r@ep-green-recipe-a5anf90w.us-east-2.aws.neon.tech/neondb?sslmode=require
+Value:  postgresql://neondb_owner:REDACTED@ep-green-recipe-a5anf90w.us-east-2.aws.neon.tech/neondb?sslmode=require
 ```
 
 **Select Environment:** Production  
@@ -137,4 +137,5 @@ Users: 0
 
 **Last Updated:** September 14, 2026  
 **Status:** Production Database Ready ✅
+
 

@@ -61,3 +61,11 @@ Thumbs.db
 # ad-hoc local test scripts
 test-calculators.js
 
+
+# Never commit setup/config docs that may contain credentials
+NEONDB_CONFIGURED.md
+NEONDB_SETUP_GUIDE.md
+SUPABASE_PRODUCTION_SETUP.md
+DEPLOYMENT_SUCCESS.md
+DEPLOYMENT_COMPLETE.md
+DATABASE_SETUP.md

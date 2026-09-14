@@ -35,7 +35,7 @@
 
 **NeonDB Connection String:**
 ```
-postgresql://neondb_owner:npg_vpLmiX2tBN8r@ep-green-recipe-a5anf90w.us-east-2.aws.neon.tech/neondb?sslmode=require
+postgresql://neondb_owner:REDACTED@ep-green-recipe-a5anf90w.us-east-2.aws.neon.tech/neondb?sslmode=require
 ```
 
 **Status:** ✅ Active in Vercel Production
@@ -227,4 +227,5 @@ INSERT INTO guides (...) VALUES (...)
 **Version:** 1.0.0 with PostgreSQL
 
 **Project Baobab is now running on production infrastructure!** 🌳
+
 
