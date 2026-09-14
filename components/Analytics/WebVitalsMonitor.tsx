@@ -28,8 +28,8 @@ export function WebVitalsMonitor() {
     try {
       const lcpObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        const lastEntry = entries[entries.length - 1];
-        vitals.LCP = Math.round(lastEntry.renderTime || lastEntry.loadTime);
+        const lastEntry = entries[entries.length - 1] as any;
+        vitals.LCP = Math.round(lastEntry.renderTime || lastEntry.loadTime || 0);
         reportWebVitals(vitals);
       });
       lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
