@@ -6,7 +6,6 @@ interface AdPlacement {
   id: string;
   zone: 'header' | 'sidebar' | 'content' | 'footer';
   size: 'leaderboard' | 'medium_rectangle' | 'skyscraper' | 'square';
- AdPlacement { component
   width: number;
   height: number;
   imageUrl?: string;
