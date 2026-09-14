@@ -4,6 +4,10 @@ export const dynamic = 'force-dynamic';
 
 const PageClient = dynamicImport(() => import('./page-client'), { ssr: true });
 
-export default function Page() {
-  return <PageClient />;
+export default function Page({
+  searchParams,
+}: {
+  searchParams: { email?: string };
+}) {
+  return <PageClient searchParams={searchParams} />;
 }
