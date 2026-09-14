@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { InputField, CalculatorResult } from './types';
+import { InputField, CalculatorResult, CalculatorProps } from './types';
 import * as cacEstimator from '@/lib/calculators/cac-estimator';
 import * as businessStartup from '@/lib/calculators/business-startup-calculator';
 import * as passportEstimator from '@/lib/calculators/passport-estimator';
