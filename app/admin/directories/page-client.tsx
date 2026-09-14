@@ -1,10 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { PrismaClient } from '@prisma/client';
 import Link from 'next/link';
-
-const prisma = new PrismaClient();
 
 interface Directory {
   id: string;
@@ -30,24 +27,14 @@ export default function AdminDirectoriesClient() {
 
   const fetchDirectories = async () => {
     try {
-      const data = await prisma.directoryListing.findMany({
-        where: { isDeleted: false },
-        orderBy: { createdAt: 'desc' },
-        take: 100,
-      });
-
-      setDirectories(
-        data.map((d) => ({
-          id: d.id,
-          name: d.name,
-          category: d.category,
-          state: d.state,
-          city: d.city,
-          verified: d.verified,
-          premium: d.premium,
-          createdAt: d.createdAt.toISOString(),
-        }))
-      );
+      const response = await fetch('/api/directories');
+      const data = await response.json();
+      const list: Directory[] = Array.isArray(data.directories)
+        ? data.directories
+        : Array.isArray(data)
+        ? data
+        : [];
+      setDirectories(list);
     } catch (error) {
       console.error('Error fetching directories:', error);
     } finally {
@@ -57,9 +44,10 @@ export default function AdminDirectoriesClient() {
 
   const toggleVerified = async (directoryId: string, currentStatus: boolean) => {
     try {
-      await prisma.directoryListing.update({
-        where: { id: directoryId },
-        data: { verified: !currentStatus },
+      await fetch(`/api/directories/${directoryId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ verified: !currentStatus }),
       });
       fetchDirectories();
     } catch (error) {
@@ -69,9 +57,10 @@ export default function AdminDirectoriesClient() {
 
   const togglePremium = async (directoryId: string, currentStatus: boolean) => {
     try {
-      await prisma.directoryListing.update({
-        where: { id: directoryId },
-        data: { premium: !currentStatus },
+      await fetch(`/api/directories/${directoryId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ premium: !currentStatus }),
       });
       fetchDirectories();
     } catch (error) {
@@ -85,9 +74,8 @@ export default function AdminDirectoriesClient() {
     }
 
     try {
-      await prisma.directoryListing.update({
-        where: { id: directoryId },
-        data: { isDeleted: true },
+      await fetch(`/api/directories/${directoryId}`, {
+        method: 'DELETE',
       });
       fetchDirectories();
     } catch (error) {

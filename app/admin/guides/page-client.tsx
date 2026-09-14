@@ -1,10 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { PrismaClient } from '@prisma/client';
 import Link from 'next/link';
-
-const prisma = new PrismaClient();
 
 interface Guide {
   id: string;
@@ -31,30 +28,9 @@ export default function AdminGuidesClient() {
 
   const fetchGuides = async () => {
     try {
-      const data = await prisma.guide.findMany({
-        where: { isDeleted: false },
-        include: {
-          domain: true,
-          subdomain: true,
-          reviewer: true,
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 50,
-      });
-
-      setGuides(
-        data.map((g) => ({
-          id: g.id,
-          title: g.title,
-          slug: g.slug,
-          domain: g.domain.name,
-          subdomain: g.subdomain.name,
-          published: g.published,
-          publishedAt: g.publishedAt?.toISOString() || g.createdAt.toISOString(),
-          createdAt: g.createdAt.toISOString(),
-          reviewer: g.reviewer ? { name: g.reviewer.name || '' } : undefined,
-        }))
-      );
+      const response = await fetch('/api/guides?limit=50&includeUnpublished=true');
+      const data = await response.json();
+      setGuides(data.guides || data || []);
     } catch (error) {
       console.error('Error fetching guides:', error);
     } finally {
@@ -64,9 +40,10 @@ export default function AdminGuidesClient() {
 
   const togglePublished = async (guideId: string, currentStatus: boolean) => {
     try {
-      await prisma.guide.update({
-        where: { id: guideId },
-        data: { published: !currentStatus },
+      await fetch(`/api/guides/${guideId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ published: !currentStatus }),
       });
       fetchGuides();
     } catch (error) {
@@ -76,7 +53,7 @@ export default function AdminGuidesClient() {
 
   const filteredGuides = guides.filter((g) =>
     g.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    g.domain.toLowerCase().includes(searchTerm.toLowerCase())
+    g.domain?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -84,7 +61,7 @@ export default function AdminGuidesClient() {
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">Manage Guides</h1>
         <Link
-          href="/admin/guides/new"
+          href="/dashboard/guides/new"
           className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           Add New Guide
